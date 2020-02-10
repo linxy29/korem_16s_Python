@@ -45,7 +45,7 @@ for key, value in fasta_dic.items():
         for comb in comb_seq:
             #distance = abs(int(comb[1][0]) - int(comb[0][0]))
             distance = int(comb[1][0]) - int(comb[0][0])
-            if distance > 200000:
+            if distance > 150000:
                 copies = comb[0][2] + "-" + comb[1][2]
                 v1v2 = pairwise2.align.globalxx(comb[0][3][49:249],comb[1][3][49:249], score_only=True)
                 v3v4 = pairwise2.align.globalxx(comb[0][3][449:799],comb[1][3][449:799], score_only=True)

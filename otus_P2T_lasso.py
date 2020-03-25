@@ -1,20 +1,18 @@
+## Get the dictionary include otus pairs selected by lasso
+
 import numpy as np
 import pandas as pd
+import re
+from sklearn.linear_model import LassoCV
 
 # 1. import ratio table and coocurrence rate dictionary
 otusRatio_df = pd.read_pickle("D:/Codes/korem_16s/Data/Real_Data/otusRatio2.df")
-#print(otusRatio_df.head())
-print("number of rows: " + str(otusRatio_df.shape[0]))
-
 Coocur_rate = np.load('D:/Codes/korem_16s/Data/Real_Data/Coocur_rate.npy',allow_pickle='TRUE').item()
 
-# 3. get PTR file
+# 2. get PTR file
 P2T_df = pd.read_pickle('D:/Codes/korem_16s/Data/Real_Data/P2T.df')
-P2T_df # growth estimates based on metagenomics for the same samples
 
-# 4. change sample names
-## raw_otu_l10_df
-
+# 3. change sample names
 ## sample name modified dictionary
 raw_otu_samplename = {'E15_1646_972761': 'E15_972761_FD443',
  'E15_2018_461108': 'E15_461108_FD451',
@@ -84,4 +82,59 @@ raw_otu_samplename = {'E15_1646_972761': 'E15_972761_FD443',
 
 otusRatio_df2 = otusRatio_df.rename(index=raw_otu_samplename)
 index = otusRatio_df2.index.tolist()
-#print(index[300:500])
+
+## select sample with 'FD'
+sub = 'FD'
+with_FD = [s for s in index if sub in s]
+otusRatio_df3 = otusRatio_df2.loc[with_FD,:]
+
+otusRatio_index = otusRatio_df3.index.tolist()
+otus_FD_name = []
+for name in otusRatio_index:
+    substr = re.findall(r"FD\d+",name)
+    otus_FD_name.append(substr[0])
+
+## check duplicates
+duplicates = []
+for item in otus_FD_name:
+    if otus_FD_name.count(item) > 1:
+        duplicates.append(item)
+
+otusRatio_df3.index = otus_FD_name
+
+P2T_FD_name = list(P2T_df.index.to_series().str.split("_").str[0])
+P2T_df.index = P2T_FD_name
+
+## change NaN into 0
+P2T_df.fillna(0,inplace = True)
+
+## select samples in both two dataframe
+## use 'otusRatio_df3' and 'P2T_df'
+ind = [item for item in otus_FD_name if item in P2T_FD_name]
+
+## remove those are duplicate
+ind2 = [item for item in ind if item not in duplicates]
+
+com_otusRatio_df = otusRatio_df3.loc[ind2,:]
+com_P2T_df = P2T_df.loc[ind2,:]
+
+# 4. lasso
+## select otusRatio
+cutoff = 0.90
+selected_otus = []
+for key, value in Coocur_rate.items():
+ if value >= cutoff:
+  selected_otus.append(key)
+
+selected_otusRatio_df = com_otusRatio_df.loc[:, selected_otus]
+
+selected_otusRatio_paris = selected_otusRatio_df.columns
+lasso_otusPairs = {}
+for column in com_P2T_df:
+    model = LassoCV(cv=10,max_iter=1000).fit(selected_otusRatio_df, com_P2T_df[column])
+    coef = model.coef_
+    coef_notZero = coef!=0
+    lasso_otusPairs[column] = selected_otusRatio_paris[coef_notZero].tolist()
+
+# Save
+np.save('D:/Codes/korem_16s/Data/Real_Data/lasso_otusRatio.npy', lasso_otusPairs)

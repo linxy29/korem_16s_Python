@@ -1,7 +1,5 @@
 # calculate ratio
 
-##！！test version(test_results.useout)
-
 # 1. get pairs_list
 with open('D:/Codes/korem_16s/Data/usearch_allpairsGlobal/test_results.useout') as read_file:
     pairs_list = []

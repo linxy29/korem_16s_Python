@@ -1,3 +1,5 @@
+## Get the otus ratio table and a dictionary with co-occurrence rate.
+
 import pandas as pd
 import numpy as np
 

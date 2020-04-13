@@ -128,6 +128,10 @@ for key, value in Coocur_rate.items():
 
 selected_otusRatio_df = com_otusRatio_df.loc[:, selected_otus]
 
+# Save
+selected_otusRatio_df.to_pickle('D:/Codes/korem_16s/Data/Real_Data/com_otusRatio90_df.npy')
+com_P2T_df.to_pickle('D:/Codes/korem_16s/Data/Real_Data/com_P2T_df.npy')
+
 selected_otusRatio_paris = selected_otusRatio_df.columns
 lasso_otusPairs = {}
 for column in com_P2T_df:

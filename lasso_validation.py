@@ -61,3 +61,6 @@ for column in P2T_pred_df:
 
 print(correlation_df.sort_values('spearmanCor'))
 
+P2T_pred_df.to_csv('D:/Codes/korem_16s/Data/Lasso/P2T_pred_df.csv')
+com_P2T_df[selected_strain2].to_csv('D:/Codes/korem_16s/Data/Lasso/P2T_true_df.csv')
+

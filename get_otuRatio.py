@@ -1,10 +1,10 @@
-## Get the otus ratio table and a dictionary with co-occurrence rate.
+## Get the otus ratio table and a dictionary with co-occurrence rate(with similarity rate 90%).
 
 import pandas as pd
 import numpy as np
 
 # 1. get pairs_list
-with open('D:/Codes/korem_16s/Data/usearch_allpairsGlobal/results.useout') as read_file:
+with open('D:/Codes/korem_16s/Data/usearch_allpairsGlobal/results90.useout') as read_file:
     pairs_list = []
     for line in read_file:
         pair = line[:-1].split("\t")
@@ -46,7 +46,7 @@ for item in pairs_list:
         otusRatio_df[item[0] + "-" + item[1]] = getRatio(raw_otu_l10_df[item[0]], raw_otu_l10_df[item[1]])
 
 #print(otusRatio_df.head())
-otusRatio_df.to_pickle('D:/Codes/korem_16s/Data/Real_Data/otusRatio.df')
+otusRatio_df.to_pickle('D:/Codes/korem_16s/Data/Real_Data/otusRatio90.df')
 
 #test = pd.read_pickle("D:/Codes/korem_16s/Data/Real_Data/otusRatio.df")
 #print(test.head())
@@ -70,10 +70,10 @@ first2pairs = {k: Coocur_rate[k] for k in list(Coocur_rate)[:2]}
 print(first2pairs)
 
 # Save
-np.save('D:/Codes/korem_16s/Data/Real_Data/Coocur_rate.npy', Coocur_rate)
+np.save('D:/Codes/korem_16s/Data/Real_Data/Coocur_rate90.npy', Coocur_rate)
 
 # Load
-Coocur_rate_dic = np.load('D:/Codes/korem_16s/Data/Real_Data/Coocur_rate.npy',allow_pickle='TRUE').item()
+Coocur_rate_dic = np.load('D:/Codes/korem_16s/Data/Real_Data/Coocur_rate90.npy',allow_pickle='TRUE').item()
 first2pairs = {k: Coocur_rate_dic[k] for k in list(Coocur_rate_dic)[:2]}
 print(first2pairs)
 

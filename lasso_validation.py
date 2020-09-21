@@ -5,9 +5,16 @@ import pandas as pd
 import random
 from sklearn.linear_model import LinearRegression
 
+similarity = float(input('The cutoff of similarity is: '))
+data_used = input('Use log of count(log) or count(count): ')
+concurr = float(input('The cutoff of concurrence rate is: '))
+
+while data_used not in ['log', 'count']:
+    data_used = input('Please enter <log> or <count> ')
+
 # Load data
-com_otusRatio90_df = pd.read_pickle('D:/Codes/korem_16s/Data/Lasso/com_otusRatio90_df.npy')
-lasso_otusRatio_dic = np.load('D:/Codes/korem_16s/Data/Lasso/lasso_otusRatio.npy',allow_pickle='TRUE').item()
+com_otusRatio_df = pd.read_pickle('D:/Codes/korem_16s/Data/Lasso/S' + str(int(similarity*100)) + '_' + data_used + '_com_otusRatio_df.npy')
+lasso_otusRatio_dic = np.load('D:/Codes/korem_16s/Data/Lasso/S' + str(int(similarity*100)) + '_' + data_used + '_lasso_otusRatio' + str(int(concurr*100)) + '.npy', allow_pickle='TRUE').item()
 com_P2T_df = pd.read_pickle('D:/Codes/korem_16s/Data/Lasso/com_P2T_df.npy')
 
 ## make sure have at least 48 sample
@@ -35,9 +42,9 @@ for column in com_P2T_df[selected_strain2]:
         test = fold
         train = [s for s in sample if s not in test]
         y_train = com_P2T_df.loc[train,:][column]
-        x_train = com_otusRatio90_df.loc[train,:][lasso_otusRatio_dic[column]]
+        x_train = com_otusRatio_df.loc[train,:][lasso_otusRatio_dic[column]]
         model = LinearRegression().fit(x_train, y_train)
-        x_test = com_otusRatio90_df.loc[test,:][lasso_otusRatio_dic[column]]
+        x_test = com_otusRatio_df.loc[test,:][lasso_otusRatio_dic[column]]
         P2T_pred_df.loc[test, column] = model.predict(x_test)
 
 P2T_pred_df.fillna(0,inplace = True)
@@ -50,8 +57,8 @@ correlation_df = pd.DataFrame(index = index_names, columns = ['pearsonCor', 'pea
 #print(correlation_df.head())
 
 for column in P2T_pred_df:
-    pred = P2T_pred_df[column]
-    true = com_P2T_df[column]
+    pred = P2T_pred_df[column][P2T_pred_df[column]!=0]
+    true = com_P2T_df[column][com_P2T_df[column]!=0]
     correlation_df.loc[column,'pearsonCor'] = stats.pearsonr(pred,true)[0]
     correlation_df.loc[column,'pearsonPvalue'] = stats.pearsonr(pred,true)[1]
     correlation_df.loc[column,'spearmanCor'] = stats.spearmanr(pred,true)[0]
@@ -61,6 +68,7 @@ for column in P2T_pred_df:
 
 print(correlation_df.sort_values('spearmanCor'))
 
-P2T_pred_df.to_csv('D:/Codes/korem_16s/Data/Lasso/P2T_pred_df.csv')
-com_P2T_df[selected_strain2].to_csv('D:/Codes/korem_16s/Data/Lasso/P2T_true_df.csv')
+P2T_pred_df.to_csv('D:/Codes/korem_16s/Data/Lasso/S' + str(int(similarity*100)) + '_P2T_pred_df' + str(int(concurr*100)) + '.csv')
+com_P2T_df[selected_strain2].to_csv('D:/Codes/korem_16s/Data/Lasso/S' + str(int(similarity*100)) + '_P2T_true_df' + str(int(concurr*100)) + '.csv')
+correlation_df.to_csv('D:/Codes/korem_16s/Data/Lasso/S' + str(int(similarity*100)) + '_correlation_df' + str(int(concurr*100)) + '.csv')
 

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 ## Import Data
@@ -12,6 +11,8 @@ P2T_df = pd.read_pickle('D:/Codes/korem_16s/Data/Real_Data/P2T.df')
 genomes_metadata = pd.read_csv("D:/Codes/korem_16s/Data/Real_Data/genomes_metadata.tsv", delimiter='\t')
 
 ## 1. filter otus mapped to different species
+'''
+## method 1
 onespe_query_list = []
 query_list = mapRate97_res['query'].unique()
 for item in query_list:
@@ -21,6 +22,12 @@ for item in query_list:
 
 print(onespe_query_list[:10])
 print('length of onespe query:' + str(len(onespe_query_list)))
+'''
+
+## method 2(faster)
+onespe_query = mapRate97_res.groupby('query').apply(lambda x: len(x.target_strain.unique()))
+print('length of onespe query:' + str((onespe_query == 1).sum()))
+onespe_query_list = onespe_query[onespe_query==1].index.tolist()
 
 onespe_mapRate97_df = mapRate97_res.loc[mapRate97_res['query'].isin(onespe_query_list)].sort_values('query')
 

@@ -1,5 +1,4 @@
 import glob
-import re
 import csv
 
 read_files = glob.glob("C:/Users/81983/Downloads/ncbi-genomes-2020-01-27-all/*.txt")
